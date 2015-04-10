@@ -736,8 +736,6 @@ template <typename Number>
 bool
 Vector<Number>::all_zero () const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   for (size_type i=0; i<vec_size; ++i)
     if (val[i] != Number(0))
       return false;
@@ -750,8 +748,6 @@ template <typename Number>
 bool
 Vector<Number>::is_non_negative () const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   for (size_type i=0; i<vec_size; ++i)
     if ( ! internal::is_non_negative (val[i]))
       return false;
@@ -874,8 +870,6 @@ Vector<Number> &Vector<Number>::operator *= (const Number factor)
 {
   AssertIsFinite(factor);
 
-  Assert (vec_size!=0, ExcEmptyObject());
-
   internal::Vectorization_multiply_factor<Number> vector_multiply;
   vector_multiply.val = val;
   vector_multiply.factor = factor;
@@ -893,8 +887,6 @@ Vector<Number>::add (const Number a,
                      const Vector<Number> &v)
 {
   AssertIsFinite(a);
-
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
   internal::Vectorization_add_av<Number> vector_add_av;
@@ -915,7 +907,6 @@ Vector<Number>::sadd (const Number x,
   AssertIsFinite(x);
   AssertIsFinite(a);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
   internal::Vectorization_sadd_xav<Number> vector_sadd_xav;
@@ -1324,8 +1315,6 @@ template <typename Number>
 template <typename Number2>
 Number Vector<Number>::operator * (const Vector<Number2> &v) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   if (PointerComparison::equal (this, &v))
     return norm_sqr();
 
@@ -1346,8 +1335,6 @@ template <typename Number>
 typename Vector<Number>::real_type
 Vector<Number>::norm_sqr () const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   real_type sum;
   internal::Vector::accumulate (internal::Vector::Norm2<Number,real_type>(),
                                 val, val, real_type(), vec_size, val, sum);
@@ -1377,8 +1364,6 @@ template <typename Number>
 typename Vector<Number>::real_type
 Vector<Number>::l1_norm () const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   real_type sum;
   internal::Vector::accumulate (internal::Vector::Norm1<Number,real_type>(),
                                 val, val, real_type(), vec_size, val, sum);
@@ -1397,8 +1382,6 @@ Vector<Number>::l2_norm () const
   // might still be finite. In that case, recompute it (this is a rare case,
   // so working on the vector twice is uncritical and paid off by the extended
   // precision) using the BLAS approach with a weight, see e.g. dnrm2.f.
-  Assert (vec_size!=0, ExcEmptyObject());
-
   real_type norm_square;
   internal::Vector::accumulate (internal::Vector::Norm2<Number,real_type>(),
                                 val, val, real_type(), vec_size, val, norm_square);
@@ -1435,8 +1418,6 @@ template <typename Number>
 typename Vector<Number>::real_type
 Vector<Number>::lp_norm (const real_type p) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   if (p == 1.)
     return l1_norm();
   else if (p == 2.)
@@ -1477,8 +1458,6 @@ template <typename Number>
 typename Vector<Number>::real_type
 Vector<Number>::linfty_norm () const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   real_type max = 0.;
 
   for (size_type i=0; i<vec_size; ++i)
@@ -1495,7 +1474,6 @@ Vector<Number>::add_and_dot (const Number          a,
                              const Vector<Number> &V,
                              const Vector<Number> &W)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   AssertDimension (vec_size, V.size());
   AssertDimension (vec_size, W.size());
 
@@ -1512,8 +1490,6 @@ Vector<Number>::add_and_dot (const Number          a,
 template <typename Number>
 Vector<Number> &Vector<Number>::operator += (const Vector<Number> &v)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   add (v);
   return *this;
 }
@@ -1523,7 +1499,6 @@ Vector<Number> &Vector<Number>::operator += (const Vector<Number> &v)
 template <typename Number>
 Vector<Number> &Vector<Number>::operator -= (const Vector<Number> &v)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
   internal::Vectorization_subtract_v<Number> vector_subtract;
@@ -1539,8 +1514,6 @@ Vector<Number> &Vector<Number>::operator -= (const Vector<Number> &v)
 template <typename Number>
 void Vector<Number>::add (const Number v)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   internal::Vectorization_add_factor<Number> vector_add;
   vector_add.val = val;
   vector_add.factor = v;
@@ -1552,7 +1525,6 @@ void Vector<Number>::add (const Number v)
 template <typename Number>
 void Vector<Number>::add (const Vector<Number> &v)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
   internal::Vectorization_add_v<Number> vector_add;
@@ -1570,7 +1542,6 @@ void Vector<Number>::add (const Number a, const Vector<Number> &v,
   AssertIsFinite(a);
   AssertIsFinite(b);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
   Assert (vec_size == w.vec_size, ExcDimensionMismatch(vec_size, w.vec_size));
 
@@ -1590,8 +1561,6 @@ void Vector<Number>::sadd (const Number x,
                            const Vector<Number> &v)
 {
   AssertIsFinite(x);
-
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
   internal::Vectorization_sadd_xv<Number> vector_sadd;
@@ -1612,7 +1581,6 @@ void Vector<Number>::sadd (const Number x, const Number a,
   AssertIsFinite(a);
   AssertIsFinite(b);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
   Assert (vec_size == w.vec_size, ExcDimensionMismatch(vec_size, w.vec_size));
 
@@ -1642,7 +1610,6 @@ void Vector<Number>::sadd (const Number x, const Number a,
 template <typename Number>
 void Vector<Number>::scale (const Vector<Number> &s)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == s.vec_size, ExcDimensionMismatch(vec_size, s.vec_size));
 
   internal::Vectorization_scale<Number> vector_scale;
@@ -1657,7 +1624,6 @@ template <typename Number>
 template <typename Number2>
 void Vector<Number>::scale (const Vector<Number2> &s)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == s.vec_size, ExcDimensionMismatch(vec_size, s.vec_size));
 
   for (size_type i=0; i<vec_size; ++i)
@@ -1672,7 +1638,6 @@ void Vector<Number>::equ (const Number a,
 {
   AssertIsFinite(a);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == u.vec_size, ExcDimensionMismatch(vec_size, u.vec_size));
 
   internal::Vectorization_equ_au<Number> vector_equ;
@@ -1691,7 +1656,6 @@ void Vector<Number>::equ (const Number a,
 {
   AssertIsFinite(a);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == u.vec_size, ExcDimensionMismatch(vec_size, u.vec_size));
 
   // set the result vector to a*u. we have to
@@ -1713,7 +1677,6 @@ void Vector<Number>::equ (const Number a, const Vector<Number> &u,
   AssertIsFinite(a);
   AssertIsFinite(b);
 
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == u.vec_size, ExcDimensionMismatch(vec_size, u.vec_size));
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
 
@@ -1732,7 +1695,6 @@ void Vector<Number>::equ (const Number a, const Vector<Number> &u,
                           const Number b, const Vector<Number> &v,
                           const Number c, const Vector<Number> &w)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == u.vec_size, ExcDimensionMismatch(vec_size, u.vec_size));
   Assert (vec_size == v.vec_size, ExcDimensionMismatch(vec_size, v.vec_size));
   Assert (vec_size == w.vec_size, ExcDimensionMismatch(vec_size, w.vec_size));
@@ -1753,7 +1715,6 @@ template <typename Number>
 void Vector<Number>::ratio (const Vector<Number> &a,
                             const Vector<Number> &b)
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (a.vec_size == b.vec_size,
           ExcDimensionMismatch (a.vec_size, b.vec_size));
 
@@ -1876,7 +1837,6 @@ template <typename Number2>
 bool
 Vector<Number>::operator== (const Vector<Number2> &v) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   Assert (vec_size == v.size(), ExcDimensionMismatch(vec_size, v.size()));
 
   // compare the two vector. we have to
@@ -1897,8 +1857,6 @@ Vector<Number>::operator== (const Vector<Number2> &v) const
 template <typename Number>
 void Vector<Number>::print (const char *format) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   for (size_type j=0; j<size(); ++j)
     internal::print (val[j], format);
   std::printf ("\n");
@@ -1912,7 +1870,6 @@ void Vector<Number>::print (std::ostream      &out,
                             const bool         scientific,
                             const bool         across) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
   AssertThrow (out, ExcIO());
 
   std::ios::fmtflags old_flags = out.flags();
@@ -1944,8 +1901,6 @@ template <typename Number>
 void
 Vector<Number>::print (LogStream &out, const unsigned int width, const bool across) const
 {
-  Assert (vec_size!=0, ExcEmptyObject());
-
   if (across)
     for (size_type i=0; i<size(); ++i)
       out << std::setw(width) << val[i] << ' ';

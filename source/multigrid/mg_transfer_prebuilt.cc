@@ -190,8 +190,11 @@ void MGTransferPrebuilt<VECTOR>::build_matrices (
                   = mg_dof.get_fe().get_prolongation_matrix (child,
                                                              cell->refinement_case());
 
-                Assert (prolongation.n() != 0, ExcNoProlongation());
-
+		if (dofs_per_cell != 0)
+		  {
+		    Assert (prolongation.n() != 0, ExcNoProlongation());
+		  }
+		
                 cell->child(child)->get_mg_dof_indices (dof_indices_child);
 
                 // now tag the entries in the
