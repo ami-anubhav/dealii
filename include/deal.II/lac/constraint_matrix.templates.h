@@ -2556,7 +2556,7 @@ add_entries_local_to_global (const std::vector<size_type> &row_indices,
   const size_type n_local_rows = row_indices.size();
   const size_type n_local_cols = col_indices.size();
   bool dof_mask_is_active = false;
-  if (dof_mask.n_rows() == n_local_rows && dof_mask.n_cols() == n_local_cols)
+  if (dof_mask.n_rows() != 0 && dof_mask.n_cols() != 0)
     dof_mask_is_active = true;
 
   // if constrained entries should be kept, need to add rows and columns of
@@ -2595,7 +2595,9 @@ add_entries_local_to_global (const std::vector<size_type> &row_indices,
       return;
     }
 
-
+  AssertDimension(dof_mask.n_rows(), n_local_rows);
+  AssertDimension(dof_mask.n_cols(), n_local_cols);
+  
   // TODO: implement this
   Assert (false, ExcNotImplemented());
 }
