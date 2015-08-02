@@ -43,7 +43,7 @@ template <typename number> class LAPACKFullMatrix;
 
 /**
  * Implementation of a classical rectangular scheme of numbers. The data type
- * of the entries is provided in the template argument <tt>number</tt>.  The
+ * of the entries is provided in the template argument `number`.  The
  * interface is quite fat and in fact has grown every time a new feature was
  * needed. So, a lot of functions are provided.
  *
@@ -51,9 +51,9 @@ template <typename number> class LAPACKFullMatrix;
  * argument to functions. If there is no argument with a number type, the
  * matrix number type is used.
  *
- * @note Instantiations for this template are provided for <tt>@<float@>,
- * @<double@>, @<long double@>, @<std::complex@<float@>@>,
- * @<std::complex@<double@>@>, @<std::complex@<long double@>@></tt>; others
+ * @note Instantiations for this template are provided for `float`,
+ * `double`, `long double`, `std::complex<float>`,
+ * `std::complex<double>`, `std::complex<long double>`; others
  * can be generated in application programs (see the section on
  * @ref Instantiations
  * in the manual).
@@ -73,7 +73,7 @@ public:
   typedef unsigned int size_type;
 
   /**
-   * Type of matrix entries. This typedef is analogous to <tt>value_type</tt>
+   * Type of matrix entries. This typedef is analogous to #value_type
    * in the standard library containers.
    */
   typedef number value_type;
@@ -182,7 +182,7 @@ public:
      */
     bool operator == (const const_iterator &) const;
     /**
-     * Inverse of <tt>==</tt>.
+     * Inverse of `==`.
      */
     bool operator != (const const_iterator &) const;
 
@@ -211,10 +211,10 @@ public:
 
   /**
    * Constructor. Initialize the matrix as a square matrix with dimension
-   * <tt>n</tt>.
+   * `n`.
    *
    * In order to avoid the implicit conversion of integers and other types to
-   * a matrix, this constructor is declared <tt>explicit</tt>.
+   * a matrix, this constructor is declared `explicit`.
    *
    * By default, no memory is allocated.
    */
@@ -230,9 +230,9 @@ public:
    * Copy constructor. This constructor does a deep copy of the matrix.
    * Therefore, it poses a possible efficiency problem, if for example,
    * function arguments are passed by value rather than by reference.
-   * Unfortunately, we can't mark this copy constructor <tt>explicit</tt>,
+   * Unfortunately, we can't mark this copy constructor `explicit`,
    * since that prevents the use of this class in containers, such as
-   * <tt>std::vector</tt>. The responsibility to check performance of programs
+   * std::vector. The responsibility to check performance of programs
    * must therefore remain with the user of this class.
    */
   FullMatrix (const FullMatrix &);
@@ -266,7 +266,11 @@ public:
    */
 
   /**
-   * Assignment operator.
+   * Assignment operator copying all elements of its argument and
+   * resizing if necessary.
+   *
+   * This function is nothing but a wrapper around
+   * TableBase::operator=() returning a FullMatrix object.
    *
    * @dealiiOperationIsMultithreaded
    */
@@ -274,7 +278,14 @@ public:
   operator = (const FullMatrix<number> &);
 
   /**
-   * Variable assignment operator.
+   * Assignment operator copying all elements of its argument and
+   * resizing if necessary.
+   *
+   * This function is nothing but a wrapper around
+   * TableBase::operator=() returning a FullMatrix object.
+   *
+   * @tparam number2 is the number type of the object to be copied and
+   * must be convertible to `number`.
    */
   template <typename number2>
   FullMatrix<number> &
@@ -283,7 +294,7 @@ public:
   /**
    * This operator assigns a scalar to a matrix. To avoid confusion with the
    * semantics of this function, zero is the only value allowed for
-   * <tt>d</tt>, allowing you to clear a matrix in an intuitive way.
+   * `d`, allowing you to clear a matrix in an intuitive way.
    *
    * @dealiiOperationIsMultithreaded
    */
@@ -328,9 +339,9 @@ public:
 
   /**
    * Fill matrix with elements extracted from a tensor, taking rows included
-   * between <tt>r_i</tt> and <tt>r_j</tt> and columns between <tt>c_i</tt>
-   * and <tt>c_j</tt>. The resulting matrix is then inserted in the
-   * destination matrix at position <tt>(dst_r, dst_c)</tt> Checks on the
+   * between `r_i` and `r_j` and columns between `c_i`
+   * and `c_j`. The resulting matrix is then inserted in the
+   * destination matrix at position `(dst_r, dst_c)` Checks on the
    * indices are made.
    */
   template <int dim>
@@ -345,7 +356,7 @@ public:
 
   /**
    * Insert a submatrix (also rectangular) into a tensor, putting its upper
-   * left element at the specified position <tt>(dst_r, dst_c)</tt> and the
+   * left element at the specified position `(dst_r, dst_c)` and the
    * other elements consequently. Default values are chosen so that no
    * parameter needs to be specified if the size of the tensor and that of the
    * matrix coincide.
@@ -398,12 +409,12 @@ public:
   /**
    * Fill rectangular block.
    *
-   * A rectangular block of the matrix <tt>src</tt> is copied into
-   * <tt>this</tt>. The upper left corner of the block being copied is
-   * <tt>(src_offset_i,src_offset_j)</tt>.  The upper left corner of the
-   * copied block is <tt>(dst_offset_i,dst_offset_j)</tt>.  The size of the
+   * A rectangular block of the matrix `src` is copied into
+   * `this`. The upper left corner of the block being copied is
+   * `(src_offset_i,src_offset_j)`.  The upper left corner of the
+   * copied block is `(dst_offset_i,dst_offset_j)`.  The size of the
    * rectangular block being copied is the maximum size possible, determined
-   * either by the size of <tt>this</tt> or <tt>src</tt>.
+   * either by the size of `this` or `src`.
    */
   template <typename number2>
   void fill (const FullMatrix<number2> &src,
@@ -422,12 +433,12 @@ public:
   /**
    * Fill with permutation of another matrix.
    *
-   * The matrix <tt>src</tt> is copied into the target. The two permutation
-   * <tt>p_r</tt> and <tt>p_c</tt> operate in a way, such that <tt>result(i,j)
-   * = src(p_r[i], p_c[j])</tt>.
+   * The matrix `src` is copied into the target. The two permutation
+   * `p_r` and `p_c` operate in a way, such that `result(i,j)
+   * = src(p_r[i], p_c[j])`.
    *
    * The vectors may also be a selection from a larger set of integers, if the
-   * matrix <tt>src</tt> is bigger. It is also possible to duplicate rows or
+   * matrix `src` is bigger. It is also possible to duplicate rows or
    * columns by this method.
    */
   template <typename number2>
@@ -485,7 +496,7 @@ public:
   bool all_zero () const;
 
   /**
-   * Return the square of the norm of the vector <tt>v</tt> induced by this
+   * Return the square of the norm of the vector `v` induced by this
    * matrix, i.e. <i>(v,Mv)</i>. This is useful, e.g. in the finite element
    * context, where the <i>L<sup>2</sup></i> norm of a function equals the
    * matrix norm with respect to the mass matrix of the vector representing
@@ -503,7 +514,7 @@ public:
   number2 matrix_norm_square (const Vector<number2> &v) const;
 
   /**
-   * Build the matrix scalar product <tt>u<sup>T</sup> M v</tt>. This function
+   * Build the matrix scalar product $u^TMv$. This function
    * is mostly useful when building the cellwise scalar product of two
    * functions in the finite element context.
    *
@@ -576,21 +587,21 @@ public:
    *
    * The parameters allow for a flexible setting of the output format:
    *
-   * @arg <tt>precision</tt> denotes the number of trailing digits.
+   * @arg `precision` denotes the number of trailing digits.
    *
-   * @arg <tt>scientific</tt> is used to determine the number format, where
-   * <tt>scientific</tt> = <tt>false</tt> means fixed point notation.
+   * @arg `scientific` is used to determine the number format, where
+   * `scientific == false` means fixed point notation.
    *
-   * @arg <tt>width</tt> denotes the with of each column. A zero entry for
-   * <tt>width</tt> makes the function compute a width, but it may be changed
+   * @arg `width` denotes the with of each column. A zero entry for
+   * `width` makes the function compute a width, but it may be changed
    * to a positive value, if output is crude.
    *
-   * @arg <tt>zero_string</tt> specifies a string printed for zero entries.
+   * @arg `zero_string` specifies a string printed for zero entries.
    *
-   * @arg <tt>denominator</tt> Multiply the whole matrix by this common
+   * @arg `denominator` Multiply the whole matrix by this common
    * denominator to get nicer numbers.
    *
-   * @arg <tt>threshold</tt>: all entries with absolute value smaller than
+   * @arg `threshold`: all entries with absolute value smaller than
    * this are considered zero.
    */
   void print_formatted (std::ostream       &out,
@@ -622,12 +633,12 @@ public:
   const_iterator end () const;
 
   /**
-   * Iterator starting at the first entry of row <tt>r</tt>.
+   * Iterator starting at the first entry of row `r`.
    */
   const_iterator begin (const size_type r) const;
 
   /**
-   * Final iterator of row <tt>r</tt>.
+   * Final iterator of row `r`.
    */
   const_iterator end (const size_type r) const;
 
@@ -646,9 +657,9 @@ public:
   FullMatrix &operator /= (const number factor);
 
   /**
-   * Simple addition of a scaled matrix, i.e. <tt>*this += a*A</tt>.
+   * Simple addition of a scaled matrix, i.e. `*this += a*A`.
    *
-   * The matrix <tt>A</tt> may be a full matrix over an arbitrary underlying
+   * The matrix `A` may be a full matrix over an arbitrary underlying
    * scalar type, as long as its data type is convertible to the data type of
    * this matrix.
    */
@@ -657,9 +668,9 @@ public:
             const FullMatrix<number2> &A);
 
   /**
-   * Multiple addition of scaled matrices, i.e. <tt>*this += a*A + b*B</tt>.
+   * Multiple addition of scaled matrices, i.e. `*this += a*A + b*B`.
    *
-   * The matrices <tt>A</tt> and <tt>B</tt> may be a full matrix over an
+   * The matrices `A` and `B` may be a full matrix over an
    * arbitrary underlying scalar type, as long as its data type is convertible
    * to the data type of this matrix.
    */
@@ -670,10 +681,10 @@ public:
             const FullMatrix<number2> &B);
 
   /**
-   * Multiple addition of scaled matrices, i.e. <tt>*this += a*A + b*B +
-   * c*C</tt>.
+   * Multiple addition of scaled matrices, i.e. `*this += a*A + b*B +
+   * c*C`.
    *
-   * The matrices <tt>A</tt>, <tt>B</tt> and <tt>C</tt> may be a full matrix
+   * The matrices `A`, `B` and `C` may be a full matrix
    * over an arbitrary underlying scalar type, as long as its data type is
    * convertible to the data type of this matrix.
    */
@@ -688,12 +699,12 @@ public:
   /**
    * Add rectangular block.
    *
-   * A rectangular block of the matrix <tt>src</tt> is added to <tt>this</tt>.
+   * A rectangular block of the matrix `src` is added to `this`.
    * The upper left corner of the block being copied is
-   * <tt>(src_offset_i,src_offset_j)</tt>.  The upper left corner of the
-   * copied block is <tt>(dst_offset_i,dst_offset_j)</tt>.  The size of the
+   * `(src_offset_i,src_offset_j)`.  The upper left corner of the
+   * copied block is `(dst_offset_i,dst_offset_j)`.  The size of the
    * rectangular block being copied is the maximum size possible, determined
-   * either by the size of <tt>this</tt> or <tt>src</tt> and the given
+   * either by the size of `this` or `src` and the given
    * offsets.
    */
   template <typename number2>
@@ -705,7 +716,7 @@ public:
             const size_type src_offset_j = 0);
 
   /**
-   * Weighted addition of the transpose of <tt>B</tt> to <tt>this</tt>.
+   * Weighted addition of the transpose of `B` to `this`.
    *
    * <i>A += s B<sup>T</sup></i>
    */
@@ -716,13 +727,13 @@ public:
   /**
    * Add transpose of a rectangular block.
    *
-   * A rectangular block of the matrix <tt>src</tt> is transposed and
-   * addedadded to <tt>this</tt>. The upper left corner of the block being
-   * copied is <tt>(src_offset_i,src_offset_j)</tt> in the coordinates of the
+   * A rectangular block of the matrix `src` is transposed and
+   * added to `*this`. The upper left corner of the block being
+   * copied is `(src_offset_i,src_offset_j)` in the coordinates of the
    * <b>non</b>-transposed matrix.  The upper left corner of the copied block
-   * is <tt>(dst_offset_i,dst_offset_j)</tt>.  The size of the rectangular
+   * is `(dst_offset_i,dst_offset_j)`.  The size of the rectangular
    * block being copied is the maximum size possible, determined either by the
-   * size of <tt>this</tt> or <tt>src</tt>.
+   * size of `this` or `src`.
    */
   template <typename number2>
   void Tadd (const FullMatrix<number2> &src,
@@ -740,7 +751,7 @@ public:
             const number value);
 
   /**
-   * Add an array of values given by <tt>values</tt> in the given global
+   * Add an array of values given by `values` in the given global
    * matrix row at columns specified by col_indices in the full matrix. This
    * function is present for compatibility with the various sparse matrices in
    * deal.II. In particular, the two boolean fields @p elide_zero_values and
@@ -805,14 +816,14 @@ public:
   void diagadd (const number s);
 
   /**
-   * Assignment <tt>*this = a*A</tt>.
+   * Assignment `*this = a*A`.
    */
   template <typename number2>
   void equ (const number               a,
             const FullMatrix<number2> &A);
 
   /**
-   * Assignment <tt>*this = a*A + b*B</tt>.
+   * Assignment `*this = a*A + b*B`.
    */
   template <typename number2>
   void equ (const number               a,
@@ -821,7 +832,7 @@ public:
             const FullMatrix<number2> &B);
 
   /**
-   * Assignment <tt>*this = a*A + b*B + c*C</tt>.
+   * Assignment `*this = a*A + b*B + c*C`.
    */
   template <typename number2>
   void equ (const number               a,
@@ -850,13 +861,13 @@ public:
    * factorization, providing best performance up to matrices with a few
    * hundreds rows and columns.
    *
-   * The numerical effort to invert an <tt>n x n</tt> matrix is of the order
-   * <tt>n**3</tt>.
+   * The numerical effort to invert an n×n-matrix is of the order
+   * n<sup>3</sup>.
    */
   void gauss_jordan ();
 
   /**
-   * Assign the inverse of the given matrix to <tt>*this</tt>. This function
+   * Assign the inverse of the given matrix to `*this`. This function
    * is hardcoded for quadratic matrices of dimension one to four. However,
    * since the amount of code needed grows quickly, the method gauss_jordan()
    * is invoked implicitly if the dimension is larger.
@@ -865,7 +876,7 @@ public:
   void invert (const FullMatrix<number2> &M);
 
   /**
-   * Assign the Cholesky decomposition of the given matrix to <tt>*this</tt>.
+   * Assign the Cholesky decomposition of the given matrix to `*this`.
    * The given matrix must be symmetric positive definite.
    *
    * ExcMatrixNotPositiveDefinite will be thrown in the case that the matrix
@@ -875,7 +886,7 @@ public:
   void cholesky (const FullMatrix<number2> &A);
 
   /**
-   * <tt>*this(i,j)</tt> = $V(i) W(j)$ where $V,W$ are vectors of the same
+   * `*this(i,j) = V(i)*W(j)` where `V` and `W` are vectors of the same
    * length.
    */
   template <typename number2>
@@ -883,7 +894,7 @@ public:
                       const Vector<number2> &W);
 
   /**
-   * Assign the left_inverse of the given matrix to <tt>*this</tt>. The
+   * Assign the left_inverse of the given matrix to `*this`. The
    * calculation being performed is <i>(A<sup>T</sup>*A)<sup>-1</sup>
    * *A<sup>T</sup></i>.
    */
@@ -891,7 +902,7 @@ public:
   void left_invert (const FullMatrix<number2> &M);
 
   /**
-   * Assign the right_inverse of the given matrix to <tt>*this</tt>. The
+   * Assign the right_inverse of the given matrix to `*this`. The
    * calculation being performed is <i>A<sup>T</sup>*(A*A<sup>T</sup>)
    * <sup>-1</sup></i>.
    */
@@ -905,15 +916,15 @@ public:
   /**
    * Matrix-matrix-multiplication.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>C</tt> or added to <tt>C</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `C` or added to `C`.
    *
    * if (adding) <i>C += A*B</i>
    *
    * if (!adding) <i>C = A*B</i>
    *
-   * Assumes that <tt>A</tt> and <tt>B</tt> have compatible sizes and that
-   * <tt>C</tt> already has the right size.
+   * Assumes that `A` and `B` have compatible sizes and that
+   * `C` already has the right size.
    *
    * This function uses the BLAS function Xgemm if the product of the three
    * matrix dimensions is larger than 300 and BLAS was detected during
@@ -926,17 +937,17 @@ public:
               const bool                 adding=false) const;
 
   /**
-   * Matrix-matrix-multiplication using transpose of <tt>this</tt>.
+   * Matrix-matrix-multiplication using transpose of `this`.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>C</tt> or added to <tt>C</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `C` or added to `C`.
    *
    * if (adding) <i>C += A<sup>T</sup>*B</i>
    *
    * if (!adding) <i>C = A<sup>T</sup>*B</i>
    *
-   * Assumes that <tt>A</tt> and <tt>B</tt> have compatible sizes and that
-   * <tt>C</tt> already has the right size.
+   * Assumes that `A` and `B` have compatible sizes and that
+   * `C` already has the right size.
    *
    * This function uses the BLAS function Xgemm if the product of the three
    * matrix dimensions is larger than 300 and BLAS was detected during
@@ -949,17 +960,17 @@ public:
                const bool                 adding=false) const;
 
   /**
-   * Matrix-matrix-multiplication using transpose of <tt>B</tt>.
+   * Matrix-matrix-multiplication using transpose of `B`.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>C</tt> or added to <tt>C</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `C` or added to `C`.
    *
    * if (adding) <i>C += A*B<sup>T</sup></i>
    *
    * if (!adding) <i>C = A*B<sup>T</sup></i>
    *
-   * Assumes that <tt>A</tt> and <tt>B</tt> have compatible sizes and that
-   * <tt>C</tt> already has the right size.
+   * Assumes that `A` and `B` have compatible sizes and that
+   * `C` already has the right size.
    *
    * This function uses the BLAS function Xgemm if the product of the three
    * matrix dimensions is larger than 300 and BLAS was detected during
@@ -972,18 +983,18 @@ public:
                const bool                 adding=false) const;
 
   /**
-   * Matrix-matrix-multiplication using transpose of <tt>this</tt> and
-   * <tt>B</tt>.
+   * Matrix-matrix-multiplication using transpose of `this` and
+   * `B`.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>C</tt> or added to <tt>C</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `C` or added to `C`.
    *
    * if (adding) <i>C += A<sup>T</sup>*B<sup>T</sup></i>
    *
    * if (!adding) <i>C = A<sup>T</sup>*B<sup>T</sup></i>
    *
-   * Assumes that <tt>A</tt> and <tt>B</tt> have compatible sizes and that
-   * <tt>C</tt> already has the right size.
+   * Assumes that `A` and `B` have compatible sizes and that
+   * `C` already has the right size.
    *
    * This function uses the BLAS function Xgemm if the product of the three
    * matrix dimensions is larger than 300 and BLAS was detected during
@@ -1003,7 +1014,7 @@ public:
    *
    * This product was written with the Schur complement <b>B<sup>T</sup>
    * A<sup>-1</sup> D</b> in mind.  Note that in this case the argument for
-   * <tt>A</tt> must be the inverse of the matrix <b>A</b>.
+   * `A` must be the inverse of the matrix <b>A</b>.
    */
   void triple_product(const FullMatrix<number> &A,
                       const FullMatrix<number> &B,
@@ -1015,8 +1026,8 @@ public:
   /**
    * Matrix-vector-multiplication.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>w</tt> or added to <tt>w</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `w` or added to `w`.
    *
    * if (adding) <i>w += A*v</i>
    *
@@ -1041,8 +1052,8 @@ public:
   /**
    * Transpose matrix-vector-multiplication.
    *
-   * The optional parameter <tt>adding</tt> determines, whether the result is
-   * stored in <tt>w</tt> or added to <tt>w</tt>.
+   * The optional parameter `adding` determines, whether the result is
+   * stored in `w` or added to `w`.
    *
    * if (adding) <i>w += A<sup>T</sup>*v</i>
    *
@@ -1068,8 +1079,8 @@ public:
 
   /**
    * Apply the Jacobi preconditioner, which multiplies every element of the
-   * <tt>src</tt> vector by the inverse of the respective diagonal element and
-   * multiplies the result with the damping factor <tt>omega</tt>.
+   * `src` vector by the inverse of the respective diagonal element and
+   * multiplies the result with the damping factor `omega`.
    */
   template <typename somenumber>
   void precondition_Jacobi (Vector<somenumber>       &dst,

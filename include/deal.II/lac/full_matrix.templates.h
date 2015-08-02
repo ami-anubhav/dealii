@@ -88,7 +88,7 @@ template <typename number>
 FullMatrix<number> &
 FullMatrix<number>::operator = (const FullMatrix<number> &M)
 {
-  Table<2,number>::operator=(M);
+  TableBase<2,number>::operator=(M);
   return *this;
 }
 
