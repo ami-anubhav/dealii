@@ -639,13 +639,19 @@ namespace GridOutFlags
 
     // View angles for the perspective view of the grid; Default is 0, 0 (top view).
     /**
-     * The azimuth angle measured from ??? in degrees. Default is 0.
+     * The azimuth angle measured from the negative y axis in degrees. Default is 0.
      */
     int azimuth_angle;
     /**
-     * The angle from vertically above the xy-plane. Default is 0.
+     * The angle from vertically above the xy-plane in degrees. Default is 0.
      */
     int polar_angle;
+
+    /**
+     * The distance of the camera from the origin in multiples of the
+     * dimensions of the domain. Defaults to 20.
+     */
+    int camera_distance;
 
     /**
      * Cell coloring.
@@ -707,6 +713,15 @@ namespace GridOutFlags
         const bool label_subdomain_id = false,
         const bool draw_colorbar = true,
         const bool draw_legend = true);
+    /**
+     * Declare parameters in ParameterHandler.
+     */
+    static void declare_parameters (ParameterHandler &param);
+
+    /**
+     * Parse parameters of ParameterHandler.
+     */
+    void parse_parameters (ParameterHandler &param);
   };
 
   /**
@@ -1608,17 +1623,17 @@ private:
   /**
    * This function projects a three-dimensional point (Point<3> point) onto a
    * two-dimensional image plane, specified by the position of the camera
-   * viewing system (Point<3> camera_position), camera direction (Point<3>
-   * camera_position), camera horizontal (Point<3> camera_horizontal,
+   * viewing system (Tensor<1,3> camera_position), camera direction (Tensor<1,3>
+   * camera_position), camera horizontal (Tensor<1,3> camera_horizontal,
    * necessary for the correct alignment of the later images), and the focus
    * of the camera (float camera_focus).
    *
    * For SVG output of grids.
    */
-  static Point<2> svg_project_point(Point<3> point,
-                                    Point<3> camera_position,
-                                    Point<3> camera_direction,
-                                    Point<3> camera_horizontal,
+    static Tensor<1,2> svg_project_point(Point<3> point,
+                                    Tensor<1,3> camera_position,
+                                    Tensor<1,3> camera_direction,
+                                    Tensor<1,3> camera_horizontal,
                                     float camera_focus);
 
   /**

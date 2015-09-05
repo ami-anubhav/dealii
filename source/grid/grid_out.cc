@@ -368,6 +368,7 @@ namespace GridOutFlags
     background(background),
     azimuth_angle(azimuth_angle),
     polar_angle(polar_angle),
+    camera_distance(20.),
     coloring(coloring),
     convert_level_number_to_height(convert_level_number_to_height),
     level_height_factor(0.3f),
@@ -381,6 +382,20 @@ namespace GridOutFlags
     draw_legend(draw_legend)
   {}
 
+  void Svg::declare_parameters (ParameterHandler &param)
+  {
+    param.declare_entry("Height", "1000", Patterns::Integer(),
+                        "Height of the output image in SVG units");
+    param.declare_entry("Width", "0", Patterns::Integer(),
+                        "Width of the output image in SVG units, zero for automatic computation");
+    param.declare_entry("Margin", "false", Patterns::Bool(),
+                        "Shall we plot a margin?");
+    param.declare_entry("Line thickness", "2", Patterns::Integer());
+    param.declare_entry("Boundary line thickness", "2", Patterns::Integer());
+    
+
+  }
+  
   MathGL::MathGL ()
     :
     draw_bounding_box (false) // box
@@ -1462,7 +1477,7 @@ void GridOut::write_svg(const Triangulation<2,2> &tria, std::ostream &out) const
   float  camera_focus;
 
   Point<3> point;
-  Point<2> projection_decomposition;
+  Tensor<1,2> projection_decomposition;
 
   float x_max_perspective, x_min_perspective;
   float y_max_perspective, y_min_perspective;
@@ -1573,7 +1588,7 @@ void GridOut::write_svg(const Triangulation<2,2> &tria, std::ostream &out) const
   // set the camera position to top view, targeting at the origin
   camera_position[0] = 0;
   camera_position[1] = 0;
-  camera_position[2] = 2. * std::max(x_dimension, y_dimension);
+  camera_position[2] = svg_flags.camera_distance * std::max(x_dimension, y_dimension);
 
   camera_direction[0] = 0;
   camera_direction[1] = 0;
@@ -1585,21 +1600,22 @@ void GridOut::write_svg(const Triangulation<2,2> &tria, std::ostream &out) const
 
   camera_focus = .5 * std::max(x_dimension, y_dimension);
 
-  Point<3> camera_position_temp;
-  Point<3> camera_direction_temp;
-  Point<3> camera_horizontal_temp;
+  Tensor<1,3> camera_position_temp;
+  Tensor<1,3> camera_direction_temp;
+  Tensor<1,3> camera_horizontal_temp;
 
   const double angle_factor = 3.14159265 / 180.;
+  const double polar_angle = angle_factor * svg_flags.polar_angle;
 
   // (I) rotate the camera to the chosen polar angle
-  camera_position_temp[1] = cos(angle_factor * svg_flags.polar_angle) * camera_position[1] - sin(angle_factor * svg_flags.polar_angle) * camera_position[2];
-  camera_position_temp[2] = sin(angle_factor * svg_flags.polar_angle) * camera_position[1] + cos(angle_factor * svg_flags.polar_angle) * camera_position[2];
+  camera_position_temp[1] = cos(polar_angle) * camera_position[1] - sin(polar_angle) * camera_position[2];
+  camera_position_temp[2] = sin(polar_angle) * camera_position[1] + cos(polar_angle) * camera_position[2];
 
-  camera_direction_temp[1] = cos(angle_factor * svg_flags.polar_angle) * camera_direction[1] - sin(angle_factor * svg_flags.polar_angle) * camera_direction[2];
-  camera_direction_temp[2] = sin(angle_factor * svg_flags.polar_angle) * camera_direction[1] + cos(angle_factor * svg_flags.polar_angle) * camera_direction[2];
+  camera_direction_temp[1] = cos(polar_angle) * camera_direction[1] - sin(polar_angle) * camera_direction[2];
+  camera_direction_temp[2] = sin(polar_angle) * camera_direction[1] + cos(polar_angle) * camera_direction[2];
 
-  camera_horizontal_temp[1] = cos(angle_factor * svg_flags.polar_angle) * camera_horizontal[1] - sin(angle_factor * svg_flags.polar_angle) * camera_horizontal[2];
-  camera_horizontal_temp[2] = sin(angle_factor * svg_flags.polar_angle) * camera_horizontal[1] + cos(angle_factor * svg_flags.polar_angle) * camera_horizontal[2];
+  camera_horizontal_temp[1] = cos(polar_angle) * camera_horizontal[1] - sin(polar_angle) * camera_horizontal[2];
+  camera_horizontal_temp[2] = sin(polar_angle) * camera_horizontal[1] + cos(polar_angle) * camera_horizontal[2];
 
   camera_position[1] = camera_position_temp[1];
   camera_position[2] = camera_position_temp[2];
@@ -1633,8 +1649,8 @@ void GridOut::write_svg(const Triangulation<2,2> &tria, std::ostream &out) const
   camera_position[0] = x_min + .5 * x_dimension;
   camera_position[1] = y_min + .5 * y_dimension;
 
-  camera_position[0] += 2. * std::max(x_dimension, y_dimension) * sin(angle_factor * svg_flags.polar_angle) * sin(angle_factor * svg_flags.azimuth_angle);
-  camera_position[1] -= 2. * std::max(x_dimension, y_dimension) * sin(angle_factor * svg_flags.polar_angle) * cos(angle_factor * svg_flags.azimuth_angle);
+  camera_position[0] += 2. * std::max(x_dimension, y_dimension) * sin(polar_angle) * sin(angle_factor * svg_flags.azimuth_angle);
+  camera_position[1] -= 2. * std::max(x_dimension, y_dimension) * sin(polar_angle) * cos(angle_factor * svg_flags.azimuth_angle);
 
 
   // determine the bounding box of the given triangulation on the projection plane of the camera viewing system
@@ -3070,24 +3086,23 @@ GridOut::write_ucd_lines(const Triangulation<dim, spacedim> &tria,
 }
 
 
-Point<2> GridOut::svg_project_point(Point<3> point, Point<3> camera_position, Point<3> camera_direction, Point<3> camera_horizontal, float camera_focus)
+Tensor<1,2> GridOut::svg_project_point(Point<3> point, Tensor<1,3> camera_position, Tensor<1,3> camera_direction, Tensor<1,3> camera_horizontal, float camera_focus)
 {
-  // ...
-  Point<3> camera_vertical;
-  camera_vertical[0] = camera_horizontal[1] * camera_direction[2] - camera_horizontal[2] * camera_direction[1];
-  camera_vertical[1] = camera_horizontal[2] * camera_direction[0] - camera_horizontal[0] * camera_direction[2];
-  camera_vertical[2] = camera_horizontal[0] * camera_direction[1] - camera_horizontal[1] * camera_direction[0];
-
+  // Cross product of view vector and horizontal line of the camera,
+  // thus the up vector in the view plane
+  Tensor<1,3> camera_vertical;
+  cross_product(camera_vertical, camera_horizontal, camera_direction);
+  
   float phi;
   phi  = camera_focus;
   phi /= (point[0] - camera_position[0]) * camera_direction[0] + (point[1] - camera_position[1]) * camera_direction[1] + (point[2] - camera_position[2]) * camera_direction[2];
 
-  Point<3> projection;
+  Tensor<1,3> projection;
   projection[0] = camera_position[0] + phi * (point[0] - camera_position[0]);
   projection[1] = camera_position[1] + phi * (point[1] - camera_position[1]);
   projection[2] = camera_position[2] + phi * (point[2] - camera_position[2]);
 
-  Point<2> projection_decomposition;
+  Tensor<1,2> projection_decomposition;
   projection_decomposition[0]  = (projection[0] - camera_position[0] - camera_focus * camera_direction[0]) * camera_horizontal[0];
   projection_decomposition[0] += (projection[1] - camera_position[1] - camera_focus * camera_direction[1]) * camera_horizontal[1];
   projection_decomposition[0] += (projection[2] - camera_position[2] - camera_focus * camera_direction[2]) * camera_horizontal[2];
