@@ -210,11 +210,11 @@ protected:
    * vectors). For the Jacobi step, the calling function must copy @p dst to
    * @p pref after this.
    */
-  template <typename number2>
+  template <class VECTOR>
   void do_step (
-    Vector<number2>       &dst,
-    const Vector<number2> &prev,
-    const Vector<number2> &src,
+    VECTOR       &dst,
+    const VECTOR &prev,
+    const VECTOR &src,
     const bool backward) const;
   /**
    * Pointer to the matrix. Make sure that the matrix exists as long as this
@@ -301,7 +301,7 @@ public:
    * Perform one step of the Jacobi iteration.
    */
   template <class VECTOR>
-  void step (VECTOR& dst, const VECTOR& rhs) const;
+  void step (VECTOR &dst, const VECTOR &rhs) const;
 
   /**
    * Perform one step of the Jacobi iteration.
@@ -386,13 +386,13 @@ public:
    * Perform one step of the SOR iteration.
    */
   template <class VECTOR>
-  void step (VECTOR &dst, const VECTOR& rhs) const;
+  void step (VECTOR &dst, const VECTOR &rhs) const;
 
   /**
    * Perform one step of the transposed SOR iteration.
    */
   template <class VECTOR>
-  void Tstep (VECTOR& dst, const VECTOR& rhs) const;
+  void Tstep (VECTOR &dst, const VECTOR &rhs) const;
 };
 
 
@@ -462,13 +462,13 @@ public:
    * Perform one step of the SSOR iteration.
    */
   template <class VECTOR>
-  void step (VECTOR &dst, const VECTOR& rhs) const;
+  void step (VECTOR &dst, const VECTOR &rhs) const;
 
   /**
    * Perform one step of the transposed SSOR iteration.
    */
   template <class VECTOR>
-  void Tstep (VECTOR& dst, const VECTOR& rhs) const;
+  void Tstep (VECTOR &dst, const VECTOR &rhs) const;
 };
 
 
