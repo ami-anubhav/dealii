@@ -300,14 +300,14 @@ public:
   /**
    * Perform one step of the Jacobi iteration.
    */
-  template <typename number2>
-  void step (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void step (VECTOR& dst, const VECTOR& rhs) const;
 
   /**
    * Perform one step of the Jacobi iteration.
    */
-  template <typename number2>
-  void Tstep (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void Tstep (VECTOR &dst, const VECTOR &rhs) const;
 
   /**
    * Return the memory allocated in this object.
@@ -385,14 +385,14 @@ public:
   /**
    * Perform one step of the SOR iteration.
    */
-  template <typename number2>
-  void step (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void step (VECTOR &dst, const VECTOR& rhs) const;
 
   /**
    * Perform one step of the transposed SOR iteration.
    */
-  template <typename number2>
-  void Tstep (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void Tstep (VECTOR& dst, const VECTOR& rhs) const;
 };
 
 
@@ -459,16 +459,16 @@ public:
   using RelaxationBlock<MatrixType, inverse_type>::inverse_svd;
   using PreconditionBlockBase<inverse_type>::log_statistics;
   /**
-   * Perform one step of the SOR iteration.
+   * Perform one step of the SSOR iteration.
    */
-  template <typename number2>
-  void step (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void step (VECTOR &dst, const VECTOR& rhs) const;
 
   /**
-   * Perform one step of the transposed SOR iteration.
+   * Perform one step of the transposed SSOR iteration.
    */
-  template <typename number2>
-  void Tstep (Vector<number2> &dst, const Vector<number2> &rhs) const;
+  template <class VECTOR>
+  void Tstep (VECTOR& dst, const VECTOR& rhs) const;
 };
 
 
