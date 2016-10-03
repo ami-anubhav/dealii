@@ -568,6 +568,93 @@ namespace LocalIntegrators
     }
 
 
+    /**
+     * Reduced upwind flux in the interior for weak advection
+     * operator. It make use of the fact that for $\gamma=1$
+     * @f[
+     * u^\uparrow = \frac12 \Bigl(\bigl(u^\uparrow+u^\downarrow\bigr)
+     * + \gamma \bigl(u^\uparrow-u^\downarrow\bigr\Bigr).
+     * @f]
+     *
+     * Thus, the upwind value is only a special case of a formulation
+     * with a free parameter, where this parameter has been chosen as
+     * one. Uses for $\gamma<1$ have been identified for
+     * advection-diffusion problems (Ayuso/Marini) and for radiation
+     * problems (Guermond/Kanschat/Ragusa).
+
+     * @f[
+     * a_{ij} = \frac12 \int_F \Bigl(
+     * \left(\mathbf w
+     * \cdot \mathbf n^\uparrow\right)
+     * (u^\uparrow+u^\downarrow)
+     * \Bigr)
+     * \gamma \left|\mathbf w
+     * \cdot \mathbf n\right|
+     * (u^\uparrow-u^\downarrow)
+     * \Bigr)
+     * (v^\uparrow-v^\downarrow)
+     * \,ds
+     * @f]
+     *
+     * The <tt>velocity</tt> is provided as a VectorSlice, having <tt>dim</tt>
+     * vectors, one for each velocity component. Each of the vectors must
+     * either have only a single entry, if the advection velocity is constant,
+     * or have an entry for each quadrature point.
+     *
+     * The finite element can have several components, in which case each
+     * component is advected the same way.
+     */
+    template <int dim>
+    void reduced_upwind_value_matrix (
+      FullMatrix<double> &M11,
+      FullMatrix<double> &M12,
+      FullMatrix<double> &M21,
+      FullMatrix<double> &M22,
+      const FEValuesBase<dim> &fe1,
+      const FEValuesBase<dim> &fe2,
+      const FEValuesBase<dim> &fetest1,
+      const FEValuesBase<dim> &fetest2,
+      const VectorSlice<const std::vector<std::vector<double> > > &velocity,
+      const double gamma,
+      const double factor = 1.)
+    {
+      const unsigned int n1 = fe1.dofs_per_cell;
+      // Multiply the quadrature point
+      // index below with this factor to
+      // have simpler data for constant
+      // velocities.
+      AssertDimension(velocity.size(), dim);
+      const unsigned int v_increment = (velocity[0].size() == 1) ? 0 : 1;
+      if (v_increment == 1)
+        {
+          AssertVectorVectorDimension(velocity, dim, fe1.n_quadrature_points);
+        }
+
+      for (unsigned k=0; k<fe1.n_quadrature_points; ++k)
+        {
+          double nbeta = fe1.normal_vector(k)[0] * velocity[0][k * v_increment];
+          for (unsigned int d=1; d<dim; ++d)
+            nbeta += fe1.normal_vector(k)[d] * velocity[d][k * v_increment];
+          const double dx = factor * fe1.JxW(k);
+	  const double penalty = gamma * std::abs(nbeta);
+
+          for (unsigned i=0; i<n1; ++i)
+            for (unsigned j=0; j<n1; ++j)
+	      for (unsigned int d=0;d<dim;++d)
+		{
+		  const double vi = fe1.shape_value_component(i,k,d);
+		  const double ve = fe2.shape_value_component(i,k,d);
+		  const double ui = fe1.shape_value_component(j,k,d);
+		  const double ue = fe2.shape_value_component(j,k,d);
+		  M11(i,j) += dx*.5*( nbeta*vi*ui+penalty*ui*vi);
+		  M12(i,j) += dx*.5*( nbeta*vi*ue-penalty*vi*ue);
+		  M21(i,j) += dx*.5*(-nbeta*ve*ui-penalty*ui*ve);
+		  M22(i,j) += dx*.5*(-nbeta*ve*ue+penalty*ue*ve);
+		}
+        }
+    }
+
+
 
     /**
      * Scalar case: Upwind flux in the interior for weak advection operator.
