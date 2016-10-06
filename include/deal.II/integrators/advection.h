@@ -640,10 +640,10 @@ namespace LocalIntegrators
 
           for (unsigned i=0; i<n1; ++i)
             for (unsigned j=0; j<n1; ++j)
-	      for (unsigned int d=0;d<dim;++d)
+	      for (unsigned int d=0;d<fe1.get_fe().n_components();++d)
 		{
-		  const double vi = fe1.shape_value_component(i,k,d);
-		  const double ve = fe2.shape_value_component(i,k,d);
+		  const double vi = fetest1.shape_value_component(i,k,d);
+		  const double ve = fetest2.shape_value_component(i,k,d);
 		  const double ui = fe1.shape_value_component(j,k,d);
 		  const double ue = fe2.shape_value_component(j,k,d);
 		  M11(i,j) += dx*.5*( nbeta*vi*ui+penalty*ui*vi);
