@@ -286,7 +286,6 @@ namespace LocalIntegrators
     }
 
 
-
     /**
      * Upwind flux at the boundary for weak advection operator. This is the
      * value of the trial function at the outflow boundary and zero else:
@@ -346,6 +345,64 @@ namespace LocalIntegrators
                                   * fe.shape_value_component(j,k,c);
                   }
             }
+        }
+    }
+
+
+    /**
+     * Reduced upwind flux at the boundary for weak advection operator. This is the
+     * value of the trial function at the outflow boundary and zero else:
+     * @f[
+     * a_{ij} = ??? \int_{\partial\Omega}
+     * [\mathbf w\cdot\mathbf n]_+
+     * u_i v_j \, ds
+     * @f]
+     *
+     * The <tt>velocity</tt> is provided as a VectorSlice, having <tt>dim</tt>
+     * vectors, one for each velocity component. Each of the vectors must
+     * either have only a single entry, if the advection velocity is constant,
+     * or have an entry for each quadrature point.
+     *
+     * The finite element can have several components, in which case each
+     * component is advected by the same velocity.
+     */
+    template <int dim>
+    void reduced_upwind_value_matrix(
+      FullMatrix<double> &M,
+      const FEValuesBase<dim> &fe,
+      const FEValuesBase<dim> &fetest,
+      const VectorSlice<const std::vector<std::vector<double> > > &velocity,
+      double factor = 1.)
+    {
+      const unsigned int n_dofs = fe.dofs_per_cell;
+      const unsigned int t_dofs = fetest.dofs_per_cell;
+      unsigned int n_components = fe.get_fe().n_components();
+      AssertDimension (M.m(), n_dofs);
+      AssertDimension (M.n(), n_dofs);
+
+      AssertDimension(velocity.size(), dim);
+      const unsigned int v_increment = (velocity[0].size() == 1) ? 0 : 1;
+      if (v_increment == 1)
+        {
+          AssertVectorVectorDimension(velocity, dim, fe.n_quadrature_points);
+        }
+      
+      for (unsigned k=0; k<fe.n_quadrature_points; ++k)
+        {
+          double nbeta = fe.normal_vector(k)[0] * velocity[0][k * v_increment];
+          for (unsigned int d=1; d<dim; ++d)
+            nbeta += fe.normal_vector(k)[d] * velocity[d][k * v_increment];
+          const double dx = factor * fe.JxW(k);
+	  const double penalty = gamma * std::abs(nbeta);
+
+          for (unsigned i=0; i<t_dofs; ++i)
+            for (unsigned j=0; j<n_dofs; ++j)
+	      for (unsigned int d=0;d<fe.get_fe().n_components();++d)
+		{
+		  const double vi = fetest.shape_value_component(i,k,d);
+		  const double ui = fe.shape_value_component(j,k,d);
+		  M(i,j) += dx*.5*( nbeta*vi*ui+penalty*ui*vi);
+		}
         }
     }
 
