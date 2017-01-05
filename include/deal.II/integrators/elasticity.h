@@ -465,6 +465,7 @@ namespace LocalIntegrators
                 }
         }
     }
+    
     /**
      * Elasticity residual term for the symmetric interior penalty method.
      *
@@ -536,6 +537,104 @@ namespace LocalIntegrators
               }
         }
     }
+    /**
+     * Flux for the interior penalty method for the Laplacian applied to the
+     * tangential components of a vector field, namely on the face <i>F</i>
+     * the matrices associated with the bilinear form
+     * @f[
+     * \int_F \Bigl( \gamma [u_\tau][v_\tau] - \{\nabla u_\tau\}[v_\tau\mathbf n] - [u_\tau\mathbf
+     * n]\{\nabla v_\tau\} \Bigr) \; ds.
+     * @f]
+     *
+     * @warning This function is still under development!
+     *
+     * @author Guido Kanschat
+     * @date 2017
+     */
+    template <int dim>
+    void ip_tangential_matrix (
+      FullMatrix<double> &M11,
+      FullMatrix<double> &M12,
+      FullMatrix<double> &M21,
+      FullMatrix<double> &M22,
+      const FEValuesBase<dim> &fe1,
+      const FEValuesBase<dim> &fe2,
+      double penalty,
+      double factor1 = 1.,
+      double factor2 = -1.)
+    {
+      const unsigned int n_dofs = fe1.dofs_per_cell;
+      AssertDimension(fe1.get_fe().n_components(), dim);
+      AssertDimension(fe2.get_fe().n_components(), dim);
+      AssertDimension(M11.n(), n_dofs);
+      AssertDimension(M11.m(), n_dofs);
+      AssertDimension(M12.n(), n_dofs);
+      AssertDimension(M12.m(), n_dofs);
+      AssertDimension(M21.n(), n_dofs);
+      AssertDimension(M21.m(), n_dofs);
+      AssertDimension(M22.n(), n_dofs);
+      AssertDimension(M22.m(), n_dofs);
+
+      const double nui = factor1;
+      const double nue = (factor2 < 0) ? factor1 : factor2;
+      const double nu = .5*(nui+nue);
+
+      for (unsigned int k=0; k<fe1.n_quadrature_points; ++k)
+        {
+          const double dx = fe1.JxW(k);
+          const Tensor<1,dim> n = fe1.normal_vector(k);
+          for (unsigned int i=0; i<n_dofs; ++i)
+            {
+              for (unsigned int j=0; j<n_dofs; ++j)
+                {
+                  double u1dotn = 0.;
+                  double v1dotn = 0.;
+                  double u2dotn = 0.;
+                  double v2dotn = 0.;
+
+                  double ngradu1n = 0.;
+                  double ngradv1n = 0.;
+                  double ngradu2n = 0.;
+                  double ngradv2n = 0.;
+
+                  for (unsigned int d=0; d<dim; ++d)
+                    {
+                      u1dotn += n[d]*fe1.shape_value_component(j,k,d);
+                      v1dotn += n[d]*fe1.shape_value_component(i,k,d);
+                      u2dotn += n[d]*fe2.shape_value_component(j,k,d);
+                      v2dotn += n[d]*fe2.shape_value_component(i,k,d);
+
+                      ngradu1n += n*fe1.shape_grad_component(j,k,d)*n[d];
+                      ngradv1n += n*fe1.shape_grad_component(i,k,d)*n[d];
+                      ngradu2n += n*fe2.shape_grad_component(j,k,d)*n[d];
+                      ngradv2n += n*fe2.shape_grad_component(i,k,d)*n[d];
+                    }
+
+                  for (unsigned int d1=0; d1<dim; ++d1)
+                    {
+                      const double vi = fe1.shape_value_component(i,k,d1)-v1dotn*n[d1];
+                      const double ve = fe2.shape_value_component(i,k,d1)-v2dotn*n[d1];
+                      const double ui = fe1.shape_value_component(j,k,d1)-u1dotn*n[d1];
+                      const double ue = fe2.shape_value_component(j,k,d1)-u2dotn*n[d1];
+
+                      M11(i,j) += dx*( .5*ui*ngradv1n+.5*ngradu1n*vi+penalty*ui*vi);
+		      M12(i,j) += dx*(-.5*ue*ngradv1n+.5*ngradu2n*vi-penalty*vi*ue);
+                      M21(i,j) += dx*( .5*ui*ngradv2n-.5*ngradu1n*ve-penalty*ui*ve);
+		      M22(i,j) += dx*(-.5*ue*ngradv2n-.5*ngradu2n*ve+penalty*ue*ve);
+
+		      for (unsigned int d2=0; d2<dim; ++d2)
+			{
+			  M11(i,j) -= .5*dx*vi*n[d2]*(fe1.shape_grad_component(j,k,d1)[d2]+fe1.shape_grad_component(j,k,d2)[d1]);
+			  M12(i,j) += .5*dx*vi*n[d2]*(fe2.shape_grad_component(j,k,d1)[d2]+fe1.shape_grad_component(j,k,d2)[d1]);
+			  M21(i,j) -= .5*dx*ve*n[d2]*(fe1.shape_grad_component(j,k,d1)[d2]+fe2.shape_grad_component(j,k,d2)[d1]);
+			  M22(i,j) += .5*dx*ve*n[d2]*(fe2.shape_grad_component(j,k,d1)[d2]+fe2.shape_grad_component(j,k,d2)[d1]);
+			}
+                    }
+                }
+            }
+        }
+    }
+
   }
 }
 
