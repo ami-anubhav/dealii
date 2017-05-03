@@ -118,6 +118,13 @@ public:
   const IndexSet &
   get_refinement_edge_indices (unsigned int level) const;
 
+  /**
+   * Return the indices of dofs on the given level that lie on the refinement
+   * edge towards a finer level.
+   */
+  const IndexSet &
+  get_finer_edge_indices (unsigned int level) const;
+
 
   /**
    * Return if Dirichlet boundary indices are set in initialize().
@@ -136,6 +143,10 @@ private:
    * between the level and cells on a coarser level.
    */
   std::vector<IndexSet> refinement_edge_indices;
+  /**
+   * 
+   */
+  std::vector<IndexSet> edge_to_finer_indices;
 };
 
 
@@ -146,15 +157,20 @@ MGConstrainedDoFs::initialize(const DoFHandler<dim,spacedim> &dof)
 {
   boundary_indices.clear();
   refinement_edge_indices.clear();
+  edge_to_finer_indices.clear();
 
   const unsigned int nlevels = dof.get_triangulation().n_global_levels();
 
   //At this point refinement_edge_indices is empty.
   refinement_edge_indices.resize(nlevels);
+  edge_to_finer_indices.resize(nlevels);
   for (unsigned int l=0; l<nlevels; ++l)
-    refinement_edge_indices[l] = IndexSet(dof.n_dofs(l));
+    {
+      refinement_edge_indices[l] = IndexSet(dof.n_dofs(l));
+      edge_to_finer_indices[l] = IndexSet(dof.n_dofs(l));
+    }
 
-  MGTools::extract_inner_interface_dofs (dof, refinement_edge_indices);
+  MGTools::extract_inner_interface_dofs (dof, refinement_edge_indices, edge_to_finer_indices);
 }
 
 
@@ -251,6 +267,15 @@ MGConstrainedDoFs::get_refinement_edge_indices (unsigned int level) const
 {
   AssertIndexRange(level, refinement_edge_indices.size());
   return refinement_edge_indices[level];
+}
+
+
+inline
+const IndexSet &
+MGConstrainedDoFs::get_finer_edge_indices (unsigned int level) const
+{
+  AssertIndexRange(level, edge_to_finer_indices.size());
+  return edge_to_finer_indices[level];
 }
 
 

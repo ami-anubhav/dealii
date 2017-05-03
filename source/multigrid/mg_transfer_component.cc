@@ -604,12 +604,15 @@ void MGTransferSelect<number>::build_matrices (
   MGTransferComponentBase::build_matrices (dof, mg_dof);
 
   interface_dofs.resize(mg_dof.get_triangulation().n_levels());
+  interface_finer_dofs.resize(mg_dof.get_triangulation().n_levels());
   for (unsigned int l=0; l<mg_dof.get_triangulation().n_levels(); ++l)
     {
       interface_dofs[l].clear();
       interface_dofs[l].set_size(mg_dof.n_dofs(l));
+      interface_finer_dofs[l].clear();
+      interface_finer_dofs[l].set_size(mg_dof.n_dofs(l));
     }
-  MGTools::extract_inner_interface_dofs(mg_dof, interface_dofs);
+  MGTools::extract_inner_interface_dofs(mg_dof, interface_dofs, interface_finer_dofs);
 
   // use a temporary vector to create the
   // relation between global and level dofs

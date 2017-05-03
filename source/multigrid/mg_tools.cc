@@ -1429,14 +1429,16 @@ namespace MGTools
   template <int dim, int spacedim>
   void
   extract_inner_interface_dofs (const DoFHandler<dim,spacedim> &mg_dof_handler,
-                                std::vector<IndexSet>  &interface_dofs)
+                                std::vector<IndexSet>  &coarser_edge_dofs,
+                                std::vector<IndexSet>  &finer_edge_dofs)
   {
-    Assert (interface_dofs.size() == mg_dof_handler.get_triangulation().n_global_levels(),
-            ExcDimensionMismatch (interface_dofs.size(),
+    Assert (coarser_edge_dofs.size() == mg_dof_handler.get_triangulation().n_global_levels(),
+            ExcDimensionMismatch (coarser_edge_dofs.size(),
                                   mg_dof_handler.get_triangulation().n_global_levels()));
-
-    std::vector<std::vector<types::global_dof_index> >
-    tmp_interface_dofs(interface_dofs.size());
+    AssertDimension(finer_edge_dofs.size(), coarser_edge_dofs.size());
+    
+    std::vector<std::vector<types::global_dof_index> > tmp_coarser_dofs(coarser_edge_dofs.size());
+    std::vector<std::vector<types::global_dof_index> > tmp_finer_dofs(finer_edge_dofs.size());
 
     const FiniteElement<dim,spacedim> &fe = mg_dof_handler.get_fe();
 
@@ -1483,8 +1485,15 @@ namespace MGTools
                     for (unsigned int j=0; j<dofs_per_face; ++j)
                       cell_dofs[fe.face_to_cell_index(j,face_nr)] = true;
 
+		    // Enter dofs of finer cell later
                     has_coarser_neighbor = true;
-                  }
+
+		    // Enter dofs of coarser neighbor now
+		    const unsigned int nface_nr = cell->neighbor_face_no(face_nr);
+		    neighbor->get_mg_dof_indices (local_dof_indices);
+		    for (unsigned int j=0; j<dofs_per_face; ++j)
+		      tmp_finer_dofs[neighbor->level()].push_back(local_dof_indices[fe.face_to_cell_index(j,nface_nr)]);
+		  }
               }
           }
 
@@ -1497,18 +1506,28 @@ namespace MGTools
         for (unsigned int i=0; i<dofs_per_cell; ++i)
           {
             if (cell_dofs[i])
-              tmp_interface_dofs[level].push_back(local_dof_indices[i]);
+              tmp_coarser_dofs[level].push_back(local_dof_indices[i]);
           }
       }
 
     for (unsigned int l=0; l<mg_dof_handler.get_triangulation().n_global_levels(); ++l)
       {
-        interface_dofs[l].clear();
-        std::sort(tmp_interface_dofs[l].begin(), tmp_interface_dofs[l].end());
-        interface_dofs[l].add_indices(tmp_interface_dofs[l].begin(),
-                                      std::unique(tmp_interface_dofs[l].begin(),
-                                                  tmp_interface_dofs[l].end()));
-        interface_dofs[l].compress();
+        coarser_edge_dofs[l].clear();
+        std::sort(tmp_coarser_dofs[l].begin(), tmp_coarser_dofs[l].end());
+        coarser_edge_dofs[l].add_indices(tmp_coarser_dofs[l].begin(),
+                                      std::unique(tmp_coarser_dofs[l].begin(),
+                                                  tmp_coarser_dofs[l].end()));
+        coarser_edge_dofs[l].compress();
+      }
+
+    for (unsigned int l=0; l<mg_dof_handler.get_triangulation().n_global_levels(); ++l)
+      {
+        finer_edge_dofs[l].clear();
+        std::sort(tmp_finer_dofs[l].begin(), tmp_finer_dofs[l].end());
+        finer_edge_dofs[l].add_indices(tmp_finer_dofs[l].begin(),
+					 std::unique(tmp_finer_dofs[l].begin(),
+						     tmp_finer_dofs[l].end()));
+        finer_edge_dofs[l].compress();
       }
 
   }

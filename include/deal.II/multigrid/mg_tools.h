@@ -225,7 +225,8 @@ namespace MGTools
   template <int dim, int spacedim>
   void
   extract_inner_interface_dofs (const DoFHandler<dim,spacedim> &mg_dof_handler,
-                                std::vector<IndexSet>  &interface_dofs);
+                                std::vector<IndexSet>  &coarser_edge_dofs,
+                                std::vector<IndexSet>  &finer_edge_dofs);
 
 
   template <int dim, int spacedim>

@@ -112,7 +112,8 @@ for (deal_II_dimension : DIMENSIONS)
     template
     void
     extract_inner_interface_dofs (const DoFHandler<deal_II_dimension> &mg_dof_handler,
-                                  std::vector<IndexSet>  &interface_dofs);
+                                  std::vector<IndexSet>  &coarser_dofs,
+                                  std::vector<IndexSet>  &finer_dofs);
 
     template
     void

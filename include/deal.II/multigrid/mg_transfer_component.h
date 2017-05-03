@@ -352,6 +352,10 @@ private:
    * towards the lower level, excluding boundary dofs.
    */
   std::vector<IndexSet> interface_dofs;
+  /**
+   * Needed or changes in MGTools.
+   */
+  std::vector<IndexSet> interface_finer_dofs;
 
   /**
    * The constraints of the global system.
