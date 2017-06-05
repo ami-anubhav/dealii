@@ -217,6 +217,74 @@ namespace MGTools
                       std::vector<IndexSet>                 &boundary_indices,
                       const ComponentMask               &component_mask = ComponentMask());
 
+
+  /**
+   * Generate constraints to be used for assembling multigrid matrices
+   * for locally refined meshes.
+   *
+   * Equivalent to DoFTools::make_hanging_nodes_constraints() for
+   * level dofs. Note that albeit we run the local smoother in the
+   * interior of the refined part of the mesh, that is, using
+   * essential boundary conditions on the refinement edge, this
+   * function eliminates actual hanging nodes, such that a basis for
+   * the coarse grid functions onthe edge is still available. This
+   * structure is needed not for smoothing, but for the additional
+   * edge matrices used for computing global residuals after local
+   * smoothing. See Multigrid::set_edge_matrices() and
+   * Multigrid::set_edge_flux_matrices() for using these matrices and
+   * Meshworker::Assembler::MGMatrixSimple for a way to build them.
+   *
+   * While this function emulated
+   * DoFTools::make_hanging_nodes_constraints(), there is a major
+   * difference here. The standard DoFHandler as well as the
+   * hp::DoFHandler double degrees of freedom on refinement edges,
+   * such that we can constrain all degrees of freedom on the finer
+   * side and replace them by linear combinations on the coarse
+   * side. With level matrices, we do not have this option, since
+   * degrees of freedom on the coarser cell belong to a different
+   * level. Instead, we have to constrain against degrees of freedom
+   * within the fine cells. Since we have to write constraints
+   * explicitly, we have to select some more or less randomly for
+   * elimination by others. A few criteria apply though:
+   *
+   * <ol>
+   * <li> Degrees of freedom on the vertices bounding the parent face are not
+   * constrained.</li>
+   * <li> In three dimensions, degrees of freedom on the edges bounding the
+   * parent face are constrained by degrees of freedom on the same edge.</li>
+   * <li> All degrees of freedom on interior boundaries of the refinement patch
+   * are constrained.</li>
+   * <li> With all this, we have to make sure that the whole polynomial space on
+   * the parent face is contained in the constrained space. Therefore, if
+   * interpolation is defined by moments of increasing order, the highest order
+   * must be present.</li>
+   * </ol>
+   *
+   * As a first option, we can choose as degrees of freedom not fixed
+   * by rules 1 and 2 all interior degrees of freedom on the face of
+   * child one.  But then we run into the extrapolation trap. The
+   * polynomials grow very fast on the neighboring cells and thus the
+   * whole procedure becomes numerically unstable.
+   *
+   * The operation of contraining degrees of freedom is an embedding
+   * of the coarse space on the interface into the fine space, such
+   * that the eliminated degrees of freedom in the end span the
+   * complement of the range of this embedding. This is the standard
+   * elimination in DoFTools and the second part of the mapping needed
+   * here. But now we need an endomorphism with the chosen hanging
+   * nodes spanning the kernel. Thus, we first need a mapping from the
+   * fine space into the coarse space, which is then embedded back.
+   *
+   * A natural choice for this mapping is the adjoint of the
+   * embedding, since its kernel is spanned by the eliminated degrees
+   * of freedom.
+   */
+  template <typename DoFHandlerType>
+  void
+  make_hanging_node_constraints (const DoFHandlerType &dof_handler,
+                                 MGLevelObject<ConstraintMatrix> &constraints);
+
+  
   /**
    * For each level in a multigrid hierarchy, produce an IndexSet that
    * indicates which of the degrees of freedom are along interfaces of this
