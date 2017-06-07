@@ -192,8 +192,8 @@ SolverControl::step_reduction(unsigned int step) const
   Assert (history_data_enabled, ExcHistoryDataRequired());
   Assert (history_data.size() > lstep, ExcInternalError());
   Assert (step <=lstep, ExcIndexRange(step,1,lstep+1));
-  Assert (step>0, ExcIndexRange(step,1,lstep+1));
 
+  if (step == 0) return 0.;
   return history_data[step]/history_data[step-1];
 }
 
